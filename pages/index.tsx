@@ -8,6 +8,7 @@ import { AuthContext } from '../contexts/Auth';
 export default function Home() {
   const { currentUser } = useContext(AuthContext);
   const name = currentUser ? currentUser.displayName : "nasi";
+
   return (
     <div className={styles.container}>
       <Head>

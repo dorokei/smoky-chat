@@ -8,10 +8,14 @@ type AuthContextProps = {
 
 const AuthContext = createContext<AuthContextProps>({ currentUser: undefined });
 
-const AuthProvider: FC = ({ children }) => {``
+const AuthProvider: FC = ({ children }) => {
+  // undefined: 未確定(firebase問い合わせ中含む)
+  // null: 未ログイン
   const [currentUser, setCurrentUser] = useState<firebase.User | null | undefined>(
     undefined
   );
+
+  console.log(currentUser);
 
   useEffect(() => {
     // ログイン状態が変化するとfirebaseのauthメソッドを呼び出す

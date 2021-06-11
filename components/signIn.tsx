@@ -15,9 +15,9 @@ const SignIn: FC = () => {
     firebase.auth().signInWithRedirect(provider);
   }
   return (
-     <div className="container">
+    <div className="container">
       <button onClick={login}>googleでログインする</button>
-     </div>
+    </div>
   )
 }
 
