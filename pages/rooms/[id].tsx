@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import firebase from '../../lib/Firebase';
 import { useRouter } from 'next/router'
+import Logger from '../../lib/Logger'
 
 // Talk Room
 // 4 states: {loading, loadSuccess, 404, room fetching error}
@@ -18,15 +19,15 @@ export default function Room() {
   const roomRef = db.collection("rooms").doc(`${id}`);
   roomRef.get().then((doc) => {
     if (doc.exists) {
-      console.log("Document data:", doc.data());
+      Logger.debug("Document data:", doc.data());
       setSnapShot(doc);
     } else {
       // doc.data() will be undefined in this case
-      console.log("No such document!");
+      Logger.debug("No such document!");
       setSnapShot(null);
     }
   }).catch((error) => {
-    console.log("Error getting document:", error);
+    Logger.error("Error getting document:", error);
     setErrorMessage("Something wrong occured")
     setSnapShot(null);
   }).finally(() => {
