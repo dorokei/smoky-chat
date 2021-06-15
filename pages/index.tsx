@@ -3,11 +3,12 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import SignIn from "../components/signIn"
+import CreateRoomButton from "../components/createRoomButton"
 import { AuthContext } from '../contexts/Auth';
 
 export default function Home() {
   const { currentUser } = useContext(AuthContext);
-  const name = currentUser ? currentUser.displayName : "nasi";
+  const name = currentUser ? currentUser.displayName : "Guest";
 
   return (
     <div className={styles.container}>
@@ -23,6 +24,8 @@ export default function Home() {
         </h1>
         <SignIn />
         {name}
+
+        <CreateRoomButton />
 
         <p className={styles.description}>
           Get started by editing{" "}
