@@ -19,17 +19,18 @@ const CreateRoomButton: FC = () => {
     const db = firebase.firestore();
     const roomsRef = db.collection("rooms");
     const roomInfo = {
-      finishAt: new Date(Date.now() + 10 * 60 * 1000)
+      finishAt: new Date(Date.now() + 10 * 60 * 1000),
+      maxUsersCount: 5
     };
     db.collection("rooms").add(roomInfo).then((doc) => {
       if (doc) {
         Logger.debug("Doc id:", doc.id);
         Router.push('/rooms/' + doc.id);
       } else {
-        Logger.debug("No such document!");
+        Logger.error("Couldn't add a room.");
       }
     }).catch((error) => {
-      Logger.error("Error getting document:", error);
+      Logger.error("Error adding a room:", error);
       setErrorMessage("Something wrong occured");
     }).finally(() => {
       setLoading(false);

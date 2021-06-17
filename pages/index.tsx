@@ -3,7 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import SignIn from "../components/signIn"
-import CreateRoomButton from "../components/createRoomButton"
+import CreateRoomButton from "../components/CreateRoomButton"
 import { AuthContext } from '../contexts/Auth';
 
 export default function Home() {
