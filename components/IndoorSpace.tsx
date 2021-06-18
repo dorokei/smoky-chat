@@ -1,4 +1,4 @@
-import { FC, useEffect, useContext, useState } from 'react';
+import { useEffect, useState } from 'react';
 import firebase from '../lib/Firebase';
 import Logger from '../lib/Logger'
 import PeerConnectionManager from '../services/PeerConnectionManager'

@@ -1,4 +1,5 @@
 import iceConf from '../confs/iceConf'
+import Logger from '../lib/Logger'
 
 export default class PeerConnectionManager {
   private peerConnections: { [key: string]: RTCPeerConnection };
@@ -23,21 +24,21 @@ export default class PeerConnectionManager {
 
   private registerPeerConnectionListeners(peerConnection: RTCPeerConnection, targetUserId: string): void {
     peerConnection.addEventListener("icegatheringstatechange", () => {
-      console.log(
+      Logger.debug(
         `ICE gathering state to ${targetUserId} changed: ${peerConnection.iceGatheringState}`
       );
     });
 
     peerConnection.addEventListener("connectionstatechange", () => {
-      console.log(`Connection state to ${targetUserId} change: ${peerConnection.connectionState}`);
+      Logger.debug(`Connection state to ${targetUserId} change: ${peerConnection.connectionState}`);
     });
 
     peerConnection.addEventListener("signalingstatechange", () => {
-      console.log(`Signaling state to ${targetUserId} change: ${peerConnection.signalingState}`);
+      Logger.debug(`Signaling state to ${targetUserId} change: ${peerConnection.signalingState}`);
     });
 
     peerConnection.addEventListener("iceconnectionstatechange ", () => {
-      console.log(
+      Logger.debug(
         `ICE connection state to ${targetUserId} change: ${peerConnection.iceConnectionState}`
       );
     });

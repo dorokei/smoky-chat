@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import firebase from '../../lib/Firebase';
 import { useRouter } from 'next/router'
 import Logger from '../../lib/Logger'
-import IndoorSpace from '../../components/IndoorSpace'
+import Door from '../../components/Door'
+import RoomInfo from '../../components/RoomInfo'
 
 // Talk Room
 // 4 states: {loading, loadSuccess, 404, room fetching error}
@@ -22,11 +23,11 @@ export default function Room() {
     Logger.debug("fetch room doc. room id: ", roomId);
     roomRef.get().then((doc) => {
       if (doc.exists) {
-        Logger.debug("Document data:", doc.data());
+        Logger.debug("roomDoc:", doc.data());
         setRoomDoc(doc);
       } else {
         // doc.data() will be undefined in this case
-        Logger.debug("No such document!");
+        Logger.debug("No such room!");
         setRoomDoc(null);
       }
     }).catch((error) => {
@@ -50,7 +51,7 @@ export default function Room() {
 
   // loadSuccess
   if (roomDoc) {
-    return <IndoorSpace doc={roomDoc} />
+    return <><RoomInfo doc={roomDoc} /> <Door doc={roomDoc} /></>
   }
 
   // error
