@@ -6,10 +6,16 @@ import PeerConnectionManager from '../services/PeerConnectionManager'
 // add user to room
 // check how many users already exist and send offer
 // listen for offer and answer
-const IndoorSpace = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
+const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSnapshot, mediaStream: MediaStream }) => {
   const [myId, setMyId] = useState<string>(undefined);
   const [existingUserIds, setexistingUserIds] = useState<string[]>([]);
-  const [peerConnectionManager] = useState<PeerConnectionManager>(new PeerConnectionManager());
+  const [remoteStreams, setRemoteStreams] = useState<{ userId: string, stream: MediaStream }[]>([]);
+  const replaceRemoteStreams = (remoteStreams: { userId: string, stream: MediaStream }[]) => {
+    const copiesStreams = [...remoteStreams];
+    setRemoteStreams(copiesStreams);
+  };
+  const [peerConnectionManager] = useState<PeerConnectionManager>(new PeerConnectionManager(mediaStream, replaceRemoteStreams));
+
 
   // Add self to room
   useEffect(() => {
@@ -98,7 +104,24 @@ const IndoorSpace = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
     });
   }, [existingUserIds]);
 
-  return <div>室内だよ room id: {doc.id}, my id: {myId}</div>
+  const setSrcObject = (ref: HTMLAudioElement, stream: MediaStream) => {
+    if (ref) {
+      ref.srcObject = stream;
+    }
+  }
+
+  return (
+    <>
+      <div>室内だよ room id: {doc.id}, my id: {myId}</div>
+      <div className="container">
+        <ul>
+          {remoteStreams.map((remoteStream) => {
+            return <li><audio ref={ref => setSrcObject(ref, remoteStream.stream)} autoPlay controls /></li>;
+          })}
+        </ul>
+      </div>
+    </>
+  )
 };
 
 export default IndoorSpace;

@@ -18,17 +18,16 @@ const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
   }
 
   // fetch already users (depend on my id)
-  // useEffect(() => {
-  //   if (doc == undefined) return;
-  //   roomRef.collection("users").get().then((usersDoc) => {
-  //     fetchedUsersCallback(usersDoc);
-  //   })
-  // }, [doc]);
-
-  // Listen users
-  roomRef.collection("users").onSnapshot(async (usersDoc) => {
-    fetchedUsersCallback(usersDoc);
-  });
+  useEffect(() => {
+    // if (doc == undefined) return;
+    // roomRef.collection("users").get().then((usersDoc) => {
+    //   fetchedUsersCallback(usersDoc);
+    // })
+    // Listen users
+    roomRef.collection("users").onSnapshot(async (usersDoc) => {
+      fetchedUsersCallback(usersDoc);
+    });
+  }, [doc]);
 
   const enterTheRoom = () => {
     navigator.mediaDevices.getUserMedia({
@@ -44,6 +43,7 @@ const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
   const current = new Date();
   if (current.getTime() > finishAt.getTime()) {
     errors.push("時間が終了しました。");
+    // streamが開いていれば自動で閉じる
   } else if (existingUserIds && capacity <= existingUserIds.length) {
     errors.push(`人数が超過しています。(現在${existingUserIds.length}人)`);
   }
@@ -60,6 +60,14 @@ const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
     );
   }
 
+  if (existingUserIds == undefined) {
+    return (
+      <div className="container">
+        Loading
+      </div>
+    );
+  }
+
   if (!mediaStream) {
     return (
       <div className="container">
@@ -68,7 +76,7 @@ const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
     );
   }
 
-  return <IndoorSpace doc={doc} />
+  return <IndoorSpace doc={doc} mediaStream={mediaStream} />
 }
 
 export default Door;
