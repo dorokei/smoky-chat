@@ -3,9 +3,10 @@ import firebase from '../lib/Firebase';
 import Logger from '../lib/Logger'
 import PeerConnectionManager from '../services/PeerConnectionManager'
 
-// add user to room
-// check how many users already exist and send offer
-// listen for offer and answer
+// 1. Add myself to room
+// 2. Check how many users already exist and send offer
+// 3. Listen for offers, answers and ICE candidates
+// 4. Exchage each streams
 const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSnapshot, mediaStream: MediaStream }) => {
   const [myId, setMyId] = useState<string>(undefined);
   const [existingUserIds, setexistingUserIds] = useState<string[]>([]);
@@ -14,13 +15,29 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
     const copiesStreams = [...remoteStreams];
     setRemoteStreams(copiesStreams);
   };
-  const [peerConnectionManager] = useState<PeerConnectionManager>(new PeerConnectionManager(mediaStream, replaceRemoteStreams));
-
+  const roomRef = doc.ref;
+  const storeIceCandidate = (myId: string, targetUserId: string, json: RTCIceCandidateInit) => {
+    if (myId == undefined) {
+      Logger.error("My id must be string");
+      return;
+    }
+    const candidateInfo = {
+      data: json,
+      from: myId
+    };
+    Logger.debug("Store ice candidate: ", candidateInfo);
+    roomRef.collection("users").doc(`${targetUserId}`).collection("candidates").add(candidateInfo).then((doc) => {
+      Logger.debug(`Store canditate date to ${targetUserId}`, doc);
+    })
+  };
+  const [peerConnectionManager] = useState<PeerConnectionManager>(
+    new PeerConnectionManager(mediaStream, replaceRemoteStreams, storeIceCandidate)
+  );
+  peerConnectionManager.setMyId(myId);
 
   // Add self to room
   useEffect(() => {
     // TODO: リロード時はlocalに保存してあるIDから復元したい(or delete deplicated user)
-    const roomRef = doc.ref;
     roomRef.collection("users").add({}).then((userDoc) => {
       Logger.debug("Added me to room: ", userDoc.id);
       setMyId(userDoc.id);
@@ -30,7 +47,6 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
   // fetch already users (depend on my id)
   useEffect(() => {
     if (myId == undefined) return;
-    const roomRef = doc.ref;
     roomRef.collection("users").get().then((usersDoc) => {
       const ids = usersDoc.docs.map(userDoc => userDoc.id).filter(id => id != myId);
       setexistingUserIds(ids);
@@ -40,11 +56,11 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
 
   // 1. listen to offers to me and answer to offer (depend on my id)
   // 2. listen to answers to me and set local
+  // 3. Listen to ICE candidates
   useEffect(() => {
     if (myId == undefined) return;
-    const roomRef = doc.ref;
     // listen to offers
-    roomRef.collection("users").doc(`${myId}`).collection("offers").onSnapshot(async (offers) => {
+    const unsubscribeOffers = roomRef.collection("users").doc(`${myId}`).collection("offers").onSnapshot(async (offers) => {
       Logger.debug("Got updated offers:", offers.docs);
       offers.docs.forEach(offerDoc => {
         const offer = offerDoc.data().offer;
@@ -71,7 +87,7 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
     });
 
     // listen to answers
-    roomRef.collection("users").doc(`${myId}`).collection("answers").onSnapshot(async (answers) => {
+    const unsubscribeAnswers = roomRef.collection("users").doc(`${myId}`).collection("answers").onSnapshot(async (answers) => {
       answers.docs.forEach(answerDoc => {
         const answer = answerDoc.data().answer;
         Logger.debug("A answer to me: ", answer);
@@ -79,6 +95,27 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
         peerConnection.setRemoteDescription(answer); // Answer SDP を RemoteDescription にセット
       });
     });
+
+    // リモートピアから追加されたICE候補をリッスンして、 RTCPeerConnectionインスタンスに追加
+    const unsubscribeIceCandidates = roomRef.collection("users").doc(`${myId}`).collection("candidates").onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const data = change.doc.data().data;
+          const from = change.doc.data().from;
+          const candidate = new RTCIceCandidate(data);
+          Logger.debug(`Set remote RTCIceCandidate from ${from}: `, candidate);
+          const peerConnection = peerConnectionManager.findOrCreateBy(`${from}`);
+          peerConnection.addIceCandidate(candidate);
+        }
+      });
+    });
+
+    return function cleanup() {
+      // Unsubscribe
+      unsubscribeOffers();
+      unsubscribeAnswers();
+      unsubscribeIceCandidates();
+    };
   }, [myId]);
 
   // send offer SDPs (depend on existingUserIds)
@@ -94,7 +131,6 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
           }
         };
         Logger.debug("Post offer SDP: ", offerInfo);
-        const roomRef = doc.ref;
         roomRef.collection("users").doc(`${targetId}`).collection("offers").add(offerInfo).then((doc) => {
           Logger.debug(doc);
         })

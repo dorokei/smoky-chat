@@ -2,25 +2,30 @@ import iceConf from '../confs/iceConf'
 import Logger from '../lib/Logger'
 
 // PeerConnectionをここから外で直接操作しない
+// Firestoreに依存しない
 export default class PeerConnectionManager {
+  private myId: string;
   private peerConnections: { [key: string]: RTCPeerConnection };
-  private remoteStreams: { userId: string, stream: MediaStream }[];
+  private remoteStreams: { userId: string, stream: MediaStream }[] = [];
   private setRemoteStreams: (remoteStreams: {
     userId: string;
     stream: MediaStream;
   }[]) => void;
   private localStream: MediaStream;
+  private storeIceCandidate: (myId: string, targetUserId: string, json: RTCIceCandidateInit) => void;
 
   constructor(
     mediaStream: MediaStream,
     setRemoteStreams: (remoteStreams: {
       userId: string;
       stream: MediaStream;
-    }[]) => void) {
+    }[]) => void,
+    storeIceCandidate: (myId: string, targetUserId: string, json: RTCIceCandidateInit) => void
+  ) {
     this.peerConnections = {};
     this.localStream = mediaStream;
-    this.remoteStreams = [];
     this.setRemoteStreams = setRemoteStreams;
+    this.storeIceCandidate = storeIceCandidate;
   }
 
   // connection は必ずここで作成する
@@ -48,9 +53,23 @@ export default class PeerConnectionManager {
     this.remoteStreams.push({ userId: targetUserId, stream: remoteStream });
     this.setRemoteStreams(this.remoteStreams);
 
-    // ICE候補
+    // ICE候補収集(見つかる度に都度追加)
+    peerConnection.addEventListener("icecandidate", (event) => {
+      Logger.debug("Found local icecandidate: ", event);
+      if (event.candidate) {
+        // 候補が見つかったとき
+        const json = event.candidate.toJSON();
+        // Firestoreへ保存
+        this.storeIceCandidate(this.myId, targetUserId, json);
+      }
+    });
 
     return peerConnection;
+  }
+
+  // TODO: 要検討
+  setMyId(myId: string) {
+    this.myId = myId;
   }
 
   // 探してなければ新規作成
