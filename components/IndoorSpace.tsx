@@ -42,6 +42,22 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
       Logger.debug("Added me to room: ", userDoc.id);
       setMyId(userDoc.id);
     })
+
+    return function cleanup() {
+      // Stop media streams
+      mediaStream.getTracks().forEach(function (track) {
+        track.stop();
+      });
+
+      remoteStreams.forEach(data => {
+        data.stream.getTracks().forEach(function (track) {
+          track.stop();
+        });
+      })
+
+      // Close connections
+      peerConnectionManager.closeAll();
+    };
   }, [doc]);
 
   // fetch already users (depend on my id)
@@ -152,7 +168,7 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
       <div className="container">
         <ul>
           {remoteStreams.map((remoteStream) => {
-            return <li><audio ref={ref => setSrcObject(ref, remoteStream.stream)} autoPlay controls /></li>;
+            return <li><audio ref={ref => setSrcObject(ref, remoteStream.stream)} autoPlay /></li>;
           })}
         </ul>
       </div>

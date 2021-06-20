@@ -72,6 +72,12 @@ export default class PeerConnectionManager {
     this.myId = myId;
   }
 
+  closeAll() {
+    Object.values(this.peerConnections).forEach(data => {
+      data.close();
+    })
+  }
+
   // 探してなければ新規作成
   findOrCreateBy(targetUserId: string): RTCPeerConnection {
     if (targetUserId in this.peerConnections) {
