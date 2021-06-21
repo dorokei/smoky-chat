@@ -18,8 +18,9 @@ const CreateRoomButton: FC = () => {
 
     const db = firebase.firestore();
     const roomsRef = db.collection("rooms");
+    const minutes = 1; // 10分
     const roomInfo = {
-      finishAt: new Date(Date.now() + 10 * 60 * 1000),
+      finishAt: new Date(Date.now() + minutes * 60 * 1000),
       maxUsersCount: 5
     };
     db.collection("rooms").add(roomInfo).then((doc) => {

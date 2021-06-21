@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 const calcRemainCount = (finishAt: Date) => {
   const current = new Date();
   const countSecond = (finishAt.getTime() - current.getTime());
-  return Math.max(countSecond, 0);
+  return countSecond; // Math.max(countSecond, 0);
 };
 
 const CountDownTimer = ({ finishAt }: { finishAt: Date }) => {

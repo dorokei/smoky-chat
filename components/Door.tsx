@@ -1,32 +1,43 @@
 import { useEffect, useState } from 'react';
 import firebase from '../lib/Firebase';
 import IndoorSpace from '../components/IndoorSpace'
+import Logger from '../lib/Logger';
 
+enum StandingAt {
+  Indoor = 'Indoor',
+  Outdoor = 'Outdoor'
+};
 // 3 states
 // open: 人数と時間がOK
 // close: { overCapacity: 人が減ったら入れる, exceeedTimeLimit: 入れない}
 // entered: 入室済み
 const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
+  const current = new Date();
+  const finishAt: Date = doc.data().finishAt.toDate();
+  const [remainCount, serRemainCount] = useState(finishAt.getTime() - current.getTime());
   const [existingUserIds, setExistingUserIds] = useState<string[]>(undefined);
   const [mediaStream, setMediaStream] = useState<MediaStream>(undefined);
-  const finishAt: Date = doc.data().finishAt.toDate();
+  const [standinAt, setStandinAt] = useState<StandingAt>(StandingAt.Outdoor);
   const capacity: number = doc.data().maxUsersCount;
   const roomRef = doc.ref;
 
-  const fetchedUsersCallback = (usersDoc: firebase.firestore.QuerySnapshot) => {
-    const users = usersDoc.docs.map(userDoc => userDoc.id);
-    setExistingUserIds(users);
-  }
-
-  // fetch already users (depend on my id)
+  // fetch users and settimer
   useEffect(() => {
     // Listen users
     const unsubscribeUsers = roomRef.collection("users").onSnapshot(async (usersDoc) => {
-      fetchedUsersCallback(usersDoc);
+      const users = usersDoc.docs.map(userDoc => userDoc.id);
+      setExistingUserIds(users);
     });
+
+    const timer = setTimeout(() => {
+      Logger.debug("Time is over!");
+      setStandinAt(StandingAt.Outdoor);
+      serRemainCount(0);
+    }, finishAt.getTime() - current.getTime());
 
     return function cleanup() {
       unsubscribeUsers();
+      clearTimeout(timer);
     };
   }, [doc]);
 
@@ -35,29 +46,37 @@ const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
       video: false,
       audio: true,
     }).then((stream) => {
+      Logger.debug("got user media");
       setMediaStream(stream);
+      setStandinAt(StandingAt.Indoor);
     });
   };
 
-  let errors: string[] = [];
-
-  const current = new Date();
-  if (current.getTime() > finishAt.getTime()) {
-    errors.push("時間が終了しました。");
-  } else if (existingUserIds && capacity <= existingUserIds.length) {
-    errors.push(`人数が超過しています。(現在${existingUserIds.length}人)`);
+  const hangOff = () => {
+    setStandinAt(StandingAt.Outdoor);
+    if (mediaStream) {
+      // Stop media streams
+      mediaStream.getTracks().forEach(function (track) {
+        track.stop();
+      });
+    }
   }
 
-  if (errors.length > 0) {
+  if (current.getTime() > finishAt.getTime()) {
     return (
       <div className="container">
-        <ul>
-          {errors.map((data) => {
-            return <li>{data}</li>;
-          })}
-        </ul>
+        終了しました。
       </div>
     );
+  }
+
+  if (standinAt == StandingAt.Indoor && mediaStream) {
+    return <>
+      <IndoorSpace doc={doc} mediaStream={mediaStream} />
+      <div className="container">
+        <button onClick={hangOff}>退室する</button>
+      </div>
+    </>
   }
 
   if (existingUserIds == undefined) {
@@ -68,15 +87,17 @@ const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
     );
   }
 
-  if (!mediaStream) {
-    return (
-      <div className="container">
-        <button onClick={enterTheRoom}>入室する</button>
-      </div>
-    );
+  if (existingUserIds && capacity <= existingUserIds.length) {
+    return <div className="container">
+      {`人数が超過しています。(現在${existingUserIds.length}人)`}
+    </div>
   }
 
-  return <IndoorSpace doc={doc} mediaStream={mediaStream} />
+  return (
+    <div className="container">
+      <button onClick={enterTheRoom}>入室する</button>
+    </div>
+  );
 }
 
 export default Door;

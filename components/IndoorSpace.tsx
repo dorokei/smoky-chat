@@ -43,7 +43,7 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
       setMyId(userDoc.id);
     })
 
-    return function cleanup() {
+    return () => {
       Logger.debug("Stop all streams and close all connections");
       // Stop media streams
       mediaStream.getTracks().forEach(function (track) {
@@ -69,6 +69,15 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
       setexistingUserIds(ids);
       Logger.debug("fetched userIds: ", ids);
     })
+
+    return () => {
+      // delete self from rooms
+      roomRef.collection("users").doc(`${myId}`).delete().then(() => {
+        Logger.debug(`Myself(${myId}) successfully deleted from room!`);
+      }).catch((error) => {
+        Logger.debug("Error removing myself from room: ", error);
+      });
+    };
   }, [myId]);
 
   // 1. listen to offers to me and answer to offer (depend on my id)
