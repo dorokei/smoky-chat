@@ -5,7 +5,7 @@ import Logger from '../../lib/Logger'
 import Door from '../../components/Door'
 import RoomInfo from '../../components/RoomInfo'
 
-// Talk Room
+// Talk Room(部屋情報取ってくるだけ)
 // 4 states: {loading, loadSuccess, 404, room fetching error}
 // TODO: 待機して人数の増減が見れる。好きなタイミングで入室できる。音声は聴けない。
 export default function Room() {
@@ -51,7 +51,10 @@ export default function Room() {
 
   // loadSuccess
   if (roomDoc) {
-    return <><RoomInfo doc={roomDoc} /> <Door doc={roomDoc} /></>
+    return <>
+      <RoomInfo doc={roomDoc} />
+      <Door doc={roomDoc} />
+    </>
   }
 
   // error

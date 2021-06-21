@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import firebase from '../lib/Firebase';
 import IndoorSpace from '../components/IndoorSpace'
 
-// state
-// close: {overCapacity,exceeedTimeLimit}
-// entered
+// 3 states
+// open: 人数と時間がOK
+// close: { overCapacity: 人が減ったら入れる, exceeedTimeLimit: 入れない}
+// entered: 入室済み
 const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
   const [existingUserIds, setExistingUserIds] = useState<string[]>(undefined);
   const [mediaStream, setMediaStream] = useState<MediaStream>(undefined);
@@ -19,14 +20,14 @@ const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
 
   // fetch already users (depend on my id)
   useEffect(() => {
-    // if (doc == undefined) return;
-    // roomRef.collection("users").get().then((usersDoc) => {
-    //   fetchedUsersCallback(usersDoc);
-    // })
     // Listen users
-    roomRef.collection("users").onSnapshot(async (usersDoc) => {
+    const unsubscribeUsers = roomRef.collection("users").onSnapshot(async (usersDoc) => {
       fetchedUsersCallback(usersDoc);
     });
+
+    return function cleanup() {
+      unsubscribeUsers();
+    };
   }, [doc]);
 
   const enterTheRoom = () => {
@@ -43,7 +44,6 @@ const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
   const current = new Date();
   if (current.getTime() > finishAt.getTime()) {
     errors.push("時間が終了しました。");
-    // streamが開いていれば自動で閉じる
   } else if (existingUserIds && capacity <= existingUserIds.length) {
     errors.push(`人数が超過しています。(現在${existingUserIds.length}人)`);
   }

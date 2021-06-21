@@ -73,6 +73,7 @@ export default class PeerConnectionManager {
   }
 
   closeAll() {
+    Logger.debug("Close all connections");
     Object.values(this.peerConnections).forEach(data => {
       data.close();
     })

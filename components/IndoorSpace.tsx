@@ -44,6 +44,7 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
     })
 
     return function cleanup() {
+      Logger.debug("Stop all streams and close all connections");
       // Stop media streams
       mediaStream.getTracks().forEach(function (track) {
         track.stop();
