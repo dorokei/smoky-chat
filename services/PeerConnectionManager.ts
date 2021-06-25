@@ -74,11 +74,47 @@ export default class PeerConnectionManager {
     this.myId = myId;
   }
 
+  setRemoteDescriptionBy(targetUserId: string, description: RTCSessionDescriptionInit) {
+    const peerConnection = this.findOrCreateBy(targetUserId);
+    peerConnection.setRemoteDescription(description);
+  }
+
+  setLocalDescriptionBy(targetUserId: string, description: RTCSessionDescriptionInit) {
+    const peerConnection = this.findOrCreateBy(targetUserId);
+    peerConnection.setLocalDescription(description);
+  }
+
+  createOfferBy(targetUserId: string): Promise<RTCSessionDescriptionInit> {
+    const peerConnection = this.findOrCreateBy(targetUserId);
+    return peerConnection.createOffer();
+  }
+
+  createAnswerBy(targetUserId: string): Promise<RTCSessionDescriptionInit> {
+    const peerConnection = this.findOrCreateBy(targetUserId);
+    return peerConnection.createAnswer();
+  }
+
+  addIceCandidateBy(targetUserId: string, candidate: RTCIceCandidateInit) {
+    const peerConnection = this.findOrCreateBy(targetUserId);
+    return peerConnection.addIceCandidate(candidate);
+  }
+
+  // Stop all streams and close all connections
   closeAll() {
-    Logger.debug("Close all connections");
+    Logger.debug("Stop all streams and close all connections");
     Object.values(this.peerConnections).forEach(data => {
       data.close();
-    })
+    });
+
+    this.localStream.getTracks().forEach(function (track) {
+      track.stop();
+    });
+
+    this.remoteStreams.forEach(data => {
+      data.stream.getTracks().forEach(function (track) {
+        track.stop();
+      });
+    });
   }
 
   // 探してなければ新規作成

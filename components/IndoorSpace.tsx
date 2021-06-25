@@ -44,19 +44,7 @@ const IndoorSpace = ({ room, mediaStream }: { room: RoomModel, mediaStream: Medi
     })
 
     return () => {
-      Logger.debug("Stop all streams and close all connections");
-      // Stop media streams
-      mediaStream.getTracks().forEach(function (track) {
-        track.stop();
-      });
-
-      remoteStreams.forEach(data => {
-        data.stream.getTracks().forEach(function (track) {
-          track.stop();
-        });
-      })
-
-      // Close connections
+      // Stop all streams and close all connections
       peerConnectionManager.closeAll();
     };
   }, [room]);
@@ -91,12 +79,11 @@ const IndoorSpace = ({ room, mediaStream }: { room: RoomModel, mediaStream: Medi
       offers.docs.forEach(offerDoc => {
         const offer = offerDoc.data().offer;
         Logger.debug("A offer to me: ", offer);
-        const peerConnection = peerConnectionManager.findOrCreateBy(`${offer.from}`);
-        peerConnection.setRemoteDescription(offer); // Offer SDP を RemoteDescription にセット
+        peerConnectionManager.setRemoteDescriptionBy(offer.from, offer);
 
         // send answer
-        peerConnection.createAnswer().then((answer) => {
-          peerConnection.setLocalDescription(answer); // 生成した Answer SDP を LocalDescription にセット
+        peerConnectionManager.createAnswerBy(offer.from).then((answer) => {
+          peerConnectionManager.setLocalDescriptionBy(offer.from, answer); // 生成した Answer SDP を LocalDescription にセット
           const answerInfo = {
             answer: {
               type: answer.type,
@@ -117,8 +104,7 @@ const IndoorSpace = ({ room, mediaStream }: { room: RoomModel, mediaStream: Medi
       answers.docs.forEach(answerDoc => {
         const answer = answerDoc.data().answer;
         Logger.debug("A answer to me: ", answer);
-        const peerConnection = peerConnectionManager.findOrCreateBy(`${answer.from}`);
-        peerConnection.setRemoteDescription(answer); // Answer SDP を RemoteDescription にセット
+        peerConnectionManager.setRemoteDescriptionBy(answer.from, answer); // Answer SDP を RemoteDescription にセット
       });
     });
 
@@ -130,8 +116,7 @@ const IndoorSpace = ({ room, mediaStream }: { room: RoomModel, mediaStream: Medi
           const from = change.doc.data().from;
           const candidate = new RTCIceCandidate(data);
           Logger.debug(`Set remote RTCIceCandidate from ${from}: `, candidate);
-          const peerConnection = peerConnectionManager.findOrCreateBy(`${from}`);
-          peerConnection.addIceCandidate(candidate);
+          peerConnectionManager.addIceCandidateBy(`${from}`, candidate);
         }
       });
     });
@@ -146,9 +131,8 @@ const IndoorSpace = ({ room, mediaStream }: { room: RoomModel, mediaStream: Medi
 
   // send offer SDPs (depend on existingUserIds)
   useEffect(() => {
-    existingUserIds.forEach(targetId => {
-      const peerConnection = peerConnectionManager.findOrCreateBy(targetId);
-      peerConnection.createOffer().then((offer) => {
+    existingUserIds.forEach(targetUserId => {
+      peerConnectionManager.createOfferBy(targetUserId).then((offer) => {
         const offerInfo = {
           offer: {
             type: offer.type,
@@ -157,11 +141,11 @@ const IndoorSpace = ({ room, mediaStream }: { room: RoomModel, mediaStream: Medi
           }
         };
         Logger.debug("Post offer SDP: ", offerInfo);
-        roomRef.collection("users").doc(`${targetId}`).collection("offers").add(offerInfo).then((doc) => {
+        roomRef.collection("users").doc(`${targetUserId}`).collection("offers").add(offerInfo).then((doc) => {
           Logger.debug(doc);
         })
 
-        peerConnection.setLocalDescription(offer); // 生成した Offer SDP を LocalDescription にセット
+        peerConnectionManager.setLocalDescriptionBy(targetUserId, offer); // 生成した Offer SDP を LocalDescription にセット
       })
     });
   }, [existingUserIds]);

@@ -12,7 +12,6 @@ import RoomModel from '../../models/Room'
 export default function Room() {
   const router = useRouter()
   const { roomId } = router.query
-  //const [roomDoc, setRoomDoc] = useState<firebase.firestore.DocumentSnapshot | undefined | null>(undefined);
   const [room, setRoom] = useState<RoomModel | undefined | null>(undefined);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
