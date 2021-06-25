@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import Logger from '../../lib/Logger'
 import Door from '../../components/Door'
 import RoomInfo from '../../components/RoomInfo'
+import RoomModel from '../../models/Room'
 
 // Talk Room(部屋情報取ってくるだけ)
 // 4 states: {loading, loadSuccess, 404, room fetching error}
@@ -11,9 +12,10 @@ import RoomInfo from '../../components/RoomInfo'
 export default function Room() {
   const router = useRouter()
   const { roomId } = router.query
-  const [roomDoc, setRoomDoc] = useState<firebase.firestore.DocumentSnapshot>(undefined);
+  //const [roomDoc, setRoomDoc] = useState<firebase.firestore.DocumentSnapshot | undefined | null>(undefined);
+  const [room, setRoom] = useState<RoomModel | undefined | null>(undefined);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState(undefined);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
   // fetch room info
   useEffect(() => {
@@ -24,16 +26,16 @@ export default function Room() {
     roomRef.get().then((doc) => {
       if (doc.exists) {
         Logger.debug("roomDoc:", doc.data());
-        setRoomDoc(doc);
+        setRoom(RoomModel.createByDoc(doc));
       } else {
         // doc.data() will be undefined in this case
         Logger.debug("No such room!");
-        setRoomDoc(null);
+        setRoom(null);
       }
     }).catch((error) => {
       Logger.error("Error getting document:", error);
       setErrorMessage("Something wrong occured")
-      setRoomDoc(null);
+      setRoom(null);
     }).finally(() => {
       setLoading(false);
     });
@@ -50,10 +52,10 @@ export default function Room() {
   }
 
   // loadSuccess
-  if (roomDoc) {
+  if (room) {
     return <>
-      <RoomInfo doc={roomDoc} />
-      <Door doc={roomDoc} />
+      <RoomInfo room={room} />
+      <Door room={room} />
     </>
   }
 

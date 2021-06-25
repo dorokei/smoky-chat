@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
-import firebase from '../lib/Firebase';
 import Logger from '../lib/Logger'
 import PeerConnectionManager from '../services/PeerConnectionManager'
+import RoomModel from '../models/Room'
 
 // 1. Add myself to room
 // 2. Check how many users already exist and send offer
 // 3. Listen for offers, answers and ICE candidates
 // 4. Exchage each streams
-const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSnapshot, mediaStream: MediaStream }) => {
-  const [myId, setMyId] = useState<string>(undefined);
+const IndoorSpace = ({ room, mediaStream }: { room: RoomModel, mediaStream: MediaStream }) => {
+  const [myId, setMyId] = useState<string | undefined>(undefined);
   const [existingUserIds, setexistingUserIds] = useState<string[]>([]);
   const [remoteStreams, setRemoteStreams] = useState<{ userId: string, stream: MediaStream }[]>([]);
   const replaceRemoteStreams = (remoteStreams: { userId: string, stream: MediaStream }[]) => {
     const copiesStreams = [...remoteStreams];
     setRemoteStreams(copiesStreams);
   };
-  const roomRef = doc.ref;
+  const roomRef = room.ref;
   const storeIceCandidate = (myId: string, targetUserId: string, json: RTCIceCandidateInit) => {
     if (myId == undefined) {
       Logger.error("My id must be string");
@@ -33,7 +33,7 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
   const [peerConnectionManager] = useState<PeerConnectionManager>(
     new PeerConnectionManager(mediaStream, replaceRemoteStreams, storeIceCandidate)
   );
-  peerConnectionManager.setMyId(myId);
+  if (myId) peerConnectionManager.setMyId(myId);
 
   // Add self to room
   useEffect(() => {
@@ -59,7 +59,7 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
       // Close connections
       peerConnectionManager.closeAll();
     };
-  }, [doc]);
+  }, [room]);
 
   // fetch already users (depend on my id)
   useEffect(() => {
@@ -166,7 +166,7 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
     });
   }, [existingUserIds]);
 
-  const setSrcObject = (ref: HTMLAudioElement, stream: MediaStream) => {
+  const setSrcObject = (ref: HTMLAudioElement | null, stream: MediaStream) => {
     if (ref) {
       ref.srcObject = stream;
     }
@@ -174,7 +174,7 @@ const IndoorSpace = ({ doc, mediaStream }: { doc: firebase.firestore.DocumentSna
 
   return (
     <>
-      <div>室内だよ room id: {doc.id}, my id: {myId}</div>
+      <div>室内だよ room id: {room.roomId}, my id: {myId}</div>
       <div className="container">
         <ul>
           {remoteStreams.map((remoteStream) => {

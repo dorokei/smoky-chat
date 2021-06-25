@@ -7,7 +7,7 @@ import { AuthContext } from '../contexts/Auth';
 const CreateRoomButton: FC = () => {
   const { currentUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(undefined);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     currentUser && Router.push('/')
@@ -18,7 +18,7 @@ const CreateRoomButton: FC = () => {
 
     const db = firebase.firestore();
     const roomsRef = db.collection("rooms");
-    const minutes = 1; // 10分
+    const minutes = 10; // 10分
     const roomInfo = {
       finishAt: new Date(Date.now() + minutes * 60 * 1000),
       maxUsersCount: 5

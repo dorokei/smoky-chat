@@ -1,21 +1,19 @@
-import firebase from '../lib/Firebase';
 import { compareAsc, format } from 'date-fns'
 import ja from 'date-fns/locale/ja'
 import CountDownTimer from './CountDownTimer';
 import CountUsers from './CountUsers';
+import RoomModel from '../models/Room'
 
-const RoomInfo = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
-  console.log(doc.data());
-  const finishAt: Date = doc.data().finishAt.toDate();
+const RoomInfo = ({ room }: { room: RoomModel }) => {
   return (
     <>
       <div>
-        finish at: {format(finishAt, 'PPpp', { locale: ja })}
-        (<CountDownTimer finishAt={finishAt} />)
+        finish at: {format(room.finishAt, 'PPpp', { locale: ja })}
+        (<CountDownTimer finishAt={room.finishAt} />)
       </div>
       <div>
-        room capacity: {doc.data().maxUsersCount}
-        (<CountUsers doc={doc} />)
+        room capacity: {room.maxUserCount}
+        (<CountUsers room={room} />)
       </div>
     </>
   );

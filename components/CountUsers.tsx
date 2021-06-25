@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import firebase from '../lib/Firebase';
-const CountUsers = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
+import RoomModel from '../models/Room'
+
+const CountUsers = ({ room }: { room: RoomModel }) => {
   // fetch already users (depend on my id)
   const [count, setCount] = useState(0);
   useEffect(() => {
     // Listen users
-    const roomRef = doc.ref;
+    const roomRef = room.ref;
     const unsubscribeUsers = roomRef.collection("users").onSnapshot(async (usersDoc) => {
       setCount(usersDoc.size);
     });
@@ -13,7 +14,7 @@ const CountUsers = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
     return function cleanup() {
       unsubscribeUsers();
     };
-  }, [doc]);
+  }, [room]);
 
   return <>{count}</>
 }

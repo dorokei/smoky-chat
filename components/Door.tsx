@@ -1,25 +1,26 @@
 import { useEffect, useState } from 'react';
-import firebase from '../lib/Firebase';
 import IndoorSpace from '../components/IndoorSpace'
 import Logger from '../lib/Logger';
+import RoomModel from '../models/Room'
 
 enum StandingAt {
   Indoor = 'Indoor',
   Outdoor = 'Outdoor'
 };
+
 // 3 states
 // open: 人数と時間がOK
 // close: { overCapacity: 人が減ったら入れる, exceeedTimeLimit: 入れない}
 // entered: 入室済み
-const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
+const Door = ({ room }: { room: RoomModel }) => {
   const current = new Date();
-  const finishAt: Date = doc.data().finishAt.toDate();
+  const finishAt: Date = room.finishAt;
+  const capacity: number = room.maxUserCount;
   const [remainCount, serRemainCount] = useState(finishAt.getTime() - current.getTime());
-  const [existingUserIds, setExistingUserIds] = useState<string[]>(undefined);
-  const [mediaStream, setMediaStream] = useState<MediaStream>(undefined);
+  const [existingUserIds, setExistingUserIds] = useState<string[] | undefined>(undefined);
+  const [mediaStream, setMediaStream] = useState<MediaStream | undefined>(undefined);
   const [standinAt, setStandinAt] = useState<StandingAt>(StandingAt.Outdoor);
-  const capacity: number = doc.data().maxUsersCount;
-  const roomRef = doc.ref;
+  const roomRef = room.ref;
 
   // fetch users and settimer
   useEffect(() => {
@@ -39,7 +40,7 @@ const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
       unsubscribeUsers();
       clearTimeout(timer);
     };
-  }, [doc]);
+  }, [room]);
 
   const enterTheRoom = () => {
     navigator.mediaDevices.getUserMedia({
@@ -72,7 +73,7 @@ const Door = ({ doc }: { doc: firebase.firestore.DocumentSnapshot }) => {
 
   if (standinAt == StandingAt.Indoor && mediaStream) {
     return <>
-      <IndoorSpace doc={doc} mediaStream={mediaStream} />
+      <IndoorSpace room={room} mediaStream={mediaStream} />
       <div className="container">
         <button onClick={hangOff}>退室する</button>
       </div>

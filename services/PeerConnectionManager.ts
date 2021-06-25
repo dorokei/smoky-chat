@@ -4,7 +4,7 @@ import Logger from '../lib/Logger'
 // PeerConnectionをここから外で直接操作しない
 // Firestoreに依存しない
 export default class PeerConnectionManager {
-  private myId: string;
+  private myId: string | undefined;
   private peerConnections: { [key: string]: RTCPeerConnection };
   private remoteStreams: { userId: string, stream: MediaStream }[] = [];
   private setRemoteStreams: (remoteStreams: {
@@ -60,7 +60,9 @@ export default class PeerConnectionManager {
         // 候補が見つかったとき
         const json = event.candidate.toJSON();
         // Firestoreへ保存
-        this.storeIceCandidate(this.myId, targetUserId, json);
+        if (this.myId) {
+          this.storeIceCandidate(this.myId, targetUserId, json);
+        }
       }
     });
 
@@ -103,6 +105,7 @@ export default class PeerConnectionManager {
     });
 
     peerConnection.addEventListener("connectionstatechange", () => {
+      // "closed" | "connected" | "connecting" | "disconnected" | "failed" | "new";
       Logger.debug(`Connection state to ${targetUserId} change: ${peerConnection.connectionState}`);
     });
 
