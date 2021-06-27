@@ -18,7 +18,7 @@ const Door = ({ room }: { room: RoomModel }) => {
   const capacity: number = room.maxUserCount;
   const [remainCount, serRemainCount] = useState(finishAt.getTime() - current.getTime());
   const [existingUserIds, setExistingUserIds] = useState<string[] | undefined>(undefined);
-  const [mediaStream, setMediaStream] = useState<MediaStream | undefined>(undefined);
+  const [localStream, setLocalStream] = useState<MediaStream | undefined>(undefined);
   const [standinAt, setStandinAt] = useState<StandingAt>(StandingAt.Outdoor);
   const roomRef = room.ref;
 
@@ -48,16 +48,16 @@ const Door = ({ room }: { room: RoomModel }) => {
       audio: true,
     }).then((stream) => {
       Logger.debug("got user media");
-      setMediaStream(stream);
+      setLocalStream(stream);
       setStandinAt(StandingAt.Indoor);
     });
   };
 
   const hangOff = () => {
     setStandinAt(StandingAt.Outdoor);
-    if (mediaStream) {
+    if (localStream) {
       // Stop media streams
-      mediaStream.getTracks().forEach(function (track) {
+      localStream.getTracks().forEach(function (track) {
         track.stop();
       });
     }
@@ -71,9 +71,9 @@ const Door = ({ room }: { room: RoomModel }) => {
     );
   }
 
-  if (standinAt == StandingAt.Indoor && mediaStream) {
+  if (standinAt == StandingAt.Indoor && localStream) {
     return <>
-      <IndoorSpace room={room} mediaStream={mediaStream} />
+      <IndoorSpace room={room} localStream={localStream} />
       <div className="container">
         <button onClick={hangOff}>退室する</button>
       </div>

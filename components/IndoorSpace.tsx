@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import Logger from '../lib/Logger'
 import PeerConnectionManager from '../services/PeerConnectionManager'
 import RoomModel from '../models/Room'
+import VisualizedAudioStream from './VisualizedAudioStream'
 
 // 1. Add myself to room
 // 2. Check how many users already exist and send offer
 // 3. Listen for offers, answers and ICE candidates
 // 4. Exchage each streams
-const IndoorSpace = ({ room, mediaStream }: { room: RoomModel, mediaStream: MediaStream }) => {
+const IndoorSpace = ({ room, localStream }: { room: RoomModel, localStream: MediaStream }) => {
   const [myId, setMyId] = useState<string | undefined>(undefined);
   const [existingUserIds, setexistingUserIds] = useState<string[]>([]);
   const [remoteStreams, setRemoteStreams] = useState<{ userId: string, stream: MediaStream }[]>([]);
@@ -31,7 +32,7 @@ const IndoorSpace = ({ room, mediaStream }: { room: RoomModel, mediaStream: Medi
     })
   };
   const [peerConnectionManager] = useState<PeerConnectionManager>(
-    new PeerConnectionManager(mediaStream, replaceRemoteStreams, storeIceCandidate)
+    new PeerConnectionManager(localStream, replaceRemoteStreams, storeIceCandidate)
   );
   if (myId) peerConnectionManager.setMyId(myId);
 
@@ -159,6 +160,7 @@ const IndoorSpace = ({ room, mediaStream }: { room: RoomModel, mediaStream: Medi
   return (
     <>
       <div>室内だよ room id: {room.roomId}, my id: {myId}</div>
+      <VisualizedAudioStream stream={localStream} />
       <div className="container">
         <ul>
           {remoteStreams.map((remoteStream) => {

@@ -107,6 +107,7 @@ export default class PeerConnectionManager {
     });
 
     this.localStream.getTracks().forEach(function (track) {
+      Logger.debug("Stop local stream");
       track.stop();
     });
 
