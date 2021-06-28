@@ -1,6 +1,6 @@
 export default class AudioVisualizer {
-  audioContext: AudioContext;
-  processFrame: (data: Uint8Array) => void;
+  private audioContext: AudioContext;
+  private processFrame: (data: Uint8Array) => void;
   constructor(targetHtml: HTMLElement, stream: MediaStream) {
     const audioContext = new AudioContext();
     // Swapping values around for a better visual effect

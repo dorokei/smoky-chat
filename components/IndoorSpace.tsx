@@ -164,7 +164,10 @@ const IndoorSpace = ({ room, localStream }: { room: RoomModel, localStream: Medi
       <div className="container">
         <ul>
           {remoteStreams.map((remoteStream) => {
-            return <li><audio ref={ref => setSrcObject(ref, remoteStream.stream)} autoPlay /></li>;
+            return <li>
+              <VisualizedAudioStream stream={remoteStream.stream} />
+              <audio ref={ref => setSrcObject(ref, remoteStream.stream)} autoPlay />
+            </li>;
           })}
         </ul>
       </div>

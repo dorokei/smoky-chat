@@ -48,10 +48,12 @@ export default class PeerConnectionManager {
       event.streams[0].getTracks().forEach((track) => {
         Logger.debug(`Add a track to the remoteStream to ${targetUserId}:`, track);
         remoteStream.addTrack(track);
+        if (this.remoteStreams.find(obj => obj.userId == targetUserId) == undefined) {
+          this.remoteStreams.push({ userId: targetUserId, stream: remoteStream });
+          this.setRemoteStreams(this.remoteStreams);
+        }
       });
     });
-    this.remoteStreams.push({ userId: targetUserId, stream: remoteStream });
-    this.setRemoteStreams(this.remoteStreams);
 
     // ICE候補収集(見つかる度に都度追加)
     peerConnection.addEventListener("icecandidate", (event) => {
