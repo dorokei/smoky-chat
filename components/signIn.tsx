@@ -10,7 +10,7 @@ const SignIn: FC = () => {
   //   currentUser && Router.push('/')
   // }, [currentUser]);
 
-  const login = () => {
+  const signInWithGoogle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     // firebase.auth().signInWithRedirect(provider);
     firebase.auth().signInWithPopup(provider).then((result) => {
@@ -28,7 +28,7 @@ const SignIn: FC = () => {
     });
   }
 
-  const signout = () => {
+  const signOut = () => {
     firebase.auth().signOut().then(() => {
       // logout
     }).catch((error) => {
@@ -40,13 +40,13 @@ const SignIn: FC = () => {
   if (!currentUser) {
     return (
       <div className="container">
-        <button onClick={login}>googleでログインする</button>
+        <button onClick={signInWithGoogle}>googleでログインする</button>
       </div>
     )
   } else {
     return (
       <div className="container">
-        <button onClick={signout}>ログアウト</button>
+        <button onClick={signOut}>ログアウト</button>
       </div >
     )
   }
