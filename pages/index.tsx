@@ -1,6 +1,5 @@
 import { useContext } from 'react';
 import Image from "next/image";
-//import styles from "../styles/Home.module.css";
 import SignIn from "../components/SignIn"
 import CreateRoomButton from "../components/CreateRoomButton"
 import { AuthContext } from '../contexts/Auth';
@@ -21,7 +20,7 @@ export default function Home() {
         <div className="hero-body">
           <p className="title">
             喫煙所
-            <div className="is-pulled-right"><CreateRoomButton /></div>
+            <span className="is-pulled-right"><CreateRoomButton /></span>
           </p>
           <p className="subtitle">
             10分/最大4人
@@ -32,7 +31,7 @@ export default function Home() {
         <div className="hero-body">
           <p className="title">
             カフェ
-            <div className="is-pulled-right"><CreateRoomButton /></div>
+            <span className="is-pulled-right"><CreateRoomButton /></span>
           </p>
           <p className="subtitle">
             25分/最大5人

@@ -1,4 +1,14 @@
+import { useState } from 'react'
+// import { useContext } from 'react';
+// import { AuthContext } from '../contexts/Auth';
+import classNames from 'classnames'
+
 const Header = () => {
+  const [navbarBurgerIsActive, setNavbarBurgerIsActive] = useState(false);
+
+  // const { currentUser } = useContext(AuthContext);
+  // const name = currentUser ? currentUser.displayName : "Guest";
+
   return <nav className="navbar" role="navigation" aria-label="main navigation">
     <div className="container">
       <div className="navbar-brand">
@@ -6,14 +16,27 @@ const Header = () => {
           <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28" />
         </a>
 
-        <a role="button" className="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+        <a role="button"
+          className={classNames("navbar-burger", {
+            'is-active': navbarBurgerIsActive
+          })}
+          aria-label="menu"
+          aria-expanded="false"
+          data-target="navbarBasicExample"
+          onClick={() => setNavbarBurgerIsActive(!navbarBurgerIsActive)}
+        >
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
         </a>
       </div>
 
-      <div id="navbarBasicExample" className="navbar-menu">
+      <div
+        id="navbarBasicExample"
+        className={classNames("navbar-menu", {
+          'is-active': navbarBurgerIsActive
+        })}
+      >
         <div className="navbar-start">
           <a className="navbar-item">
             Home

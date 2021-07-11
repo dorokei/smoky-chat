@@ -39,15 +39,11 @@ const SignIn: FC = () => {
 
   if (!currentUser) {
     return (
-      <div className="container">
-        <button onClick={signInWithGoogle}>googleでログインする</button>
-      </div>
+      <button onClick={signInWithGoogle}>googleでログインする</button>
     )
   } else {
     return (
-      <div className="container">
-        <button onClick={signOut}>ログアウト</button>
-      </div >
+      <button onClick={signOut}>ログアウト</button>
     )
   }
 }

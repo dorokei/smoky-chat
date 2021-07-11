@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "bulma": "^0.9.3",
+    "classnames": "^2.3.1",
     "date-fns": "^2.22.1",
     "firebase": "^8.6.4",
     "next": "10.2.3",
