@@ -1,9 +1,10 @@
 import { FC, createContext, useEffect, useState } from 'react';
 import firebase from '../lib/Firebase';
 import Logger from '../lib/Logger'
+import User from '../models/User'
 
 type AuthContextProps = {
-  currentUser: firebase.User | null | undefined
+  currentUser: User | null | undefined
 }
 
 const AuthContext = createContext<AuthContextProps>({ currentUser: undefined });
@@ -11,21 +12,25 @@ const AuthContext = createContext<AuthContextProps>({ currentUser: undefined });
 const AuthProvider: FC = ({ children }) => {
   // undefined: 未確定(firebase問い合わせ中含む)
   // null: 未ログイン
-  const [currentUser, setCurrentUser] = useState<firebase.User | null | undefined>(
+  const [currentUser, setCurrentUser] = useState<User | null | undefined>(
     undefined
   );
 
-  Logger.debug("currentUser", currentUser);
+  Logger.debug("AuthProvider. currentUser", currentUser);
 
   useEffect(() => {
-    // ログイン状態が変化するとfirebaseのauthメソッドを呼び出す
-    firebase.auth().onAuthStateChanged((user) => {
-      Logger.debug("currentUser", currentUser);
-      setCurrentUser(user);
+    firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
+      Logger.debug("onAuthStateChanged. currentUser: ", currentUser);
+      // TODO: uidからUserをFirestoreから取得すべし。
+      if (user != null) {
+        const tmpUser = new User(user.displayName, user.uid, user.photoURL);
+        setCurrentUser(tmpUser);
+      } else {
+        setCurrentUser(null); // 未定義(Guest)
+      }
     })
   }, []);
 
-  /* 下階層のコンポーネントをラップする */
   return (
     <AuthContext.Provider value={{ currentUser: currentUser }}>
       {children}

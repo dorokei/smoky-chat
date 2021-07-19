@@ -1,14 +1,9 @@
 import { FC, useEffect, useContext } from 'react';
-import Router from 'next/router';
 import firebase from '../lib/Firebase';
 import { AuthContext } from '../contexts/Auth';
 
-const SignIn: FC = () => {
+const SignInButton: FC = () => {
   const { currentUser } = useContext(AuthContext);
-
-  // useEffect(() => {
-  //   currentUser && Router.push('/')
-  // }, [currentUser]);
 
   const signInWithGoogle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -36,10 +31,9 @@ const SignIn: FC = () => {
     });
   }
 
-
   if (!currentUser) {
     return (
-      <button onClick={signInWithGoogle}>googleでログインする</button>
+      <button className="button is-primary" onClick={signInWithGoogle}>googleでログインする</button>
     )
   } else {
     return (
@@ -48,4 +42,4 @@ const SignIn: FC = () => {
   }
 }
 
-export default SignIn;
+export default SignInButton;

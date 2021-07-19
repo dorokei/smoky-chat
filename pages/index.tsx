@@ -1,21 +1,13 @@
 import { useContext } from 'react';
-import Image from "next/image";
-import SignIn from "../components/SignIn"
 import CreateRoomButton from "../components/CreateRoomButton"
 import { AuthContext } from '../contexts/Auth';
 
 export default function Home() {
   const { currentUser } = useContext(AuthContext);
-  const name = currentUser ? currentUser.displayName : "Guest";
-
-  // const profileImage: HTMLElement = currentUser ? <img src={currentUser.photoURL} /> : <></>;
+  const name = currentUser ? currentUser.name : "Guest";
 
   return <div>
     <main>
-      {/* <SignIn />
-        {name}
-        {profileImage} */}
-
       <section className="hero is-primary">
         <div className="hero-body">
           <p className="title">
