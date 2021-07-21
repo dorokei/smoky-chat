@@ -20,7 +20,7 @@ const AuthProvider: FC = ({ children }) => {
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
-      Logger.debug("onAuthStateChanged. currentUser: ", currentUser);
+      Logger.debug("onAuthStateChanged. currentUser: ", user);
       // TODO: uidからUserをFirestoreから取得すべし。
       if (user != null) {
         const tmpUser = new User(user.displayName, user.uid, user.photoURL);

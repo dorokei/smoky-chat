@@ -1,4 +1,4 @@
-import { FC, useEffect, useContext } from 'react';
+import { FC, useContext } from 'react';
 import firebase from '../lib/Firebase';
 import { AuthContext } from '../contexts/Auth';
 
@@ -33,11 +33,11 @@ const SignInButton: FC = () => {
 
   if (!currentUser) {
     return (
-      <button className="button is-primary" onClick={signInWithGoogle}>googleでログインする</button>
+      <button className="button is-primary" onClick={signInWithGoogle}>Sign in with Google</button>
     )
   } else {
     return (
-      <button onClick={signOut}>ログアウト</button>
+      <a onClick={signOut}>ログアウト</a>
     )
   }
 }
