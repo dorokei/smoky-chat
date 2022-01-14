@@ -8,8 +8,6 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 const SessionButton = () => {
   const { currentUser } = useContext(AuthContext);
 
-  console.log("SessionButton", currentUser);
-
   if (currentUser === undefined) {
     // Fetching user data from datastore
     return <span className="icon"><FontAwesomeIcon icon={faSpinner} pulse /></span>;

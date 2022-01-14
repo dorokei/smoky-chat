@@ -23,7 +23,9 @@ const UserMenuButton = ({ user }: { user: User }) => {
     tabIndex={1}
   >
     <div className="dropdown-trigger">
-      <a onClick={() => setdropDownIsActive(!dropDownIsActive)} > <UserIcon thumbUrl={user.thumbUrl} /></a>
+      <a onClick={() => setdropDownIsActive(!dropDownIsActive)} >
+        <UserIcon thumbUrl={user.thumbUrl} figureClass='is-24x24' />
+      </a>
     </div>
     <div className="dropdown-menu" id="dropdown-menu6" role="menu">
       <div className="dropdown-content">

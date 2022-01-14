@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import CreateRoomButton from "../components/CreateRoomButton"
 import { AuthContext } from '../contexts/Auth';
+import MainLayout from "../components/MainLayout";
 
 export default function Home() {
   const { currentUser } = useContext(AuthContext);
@@ -33,3 +34,7 @@ export default function Home() {
     </main>
   </div>
 };
+
+Home.getLayout = (page: any) => (
+  <MainLayout>{page}</MainLayout>
+)

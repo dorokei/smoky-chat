@@ -1,13 +1,13 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 
-const UserIcon = ({ thumbUrl }: { thumbUrl: string | null }) => {
+const UserIcon = ({ thumbUrl, figureClass }: { thumbUrl: string | null, figureClass: string }) => {
   if (thumbUrl != null) {
-    return <figure className="image is-24x24">
+    return <figure className={"image " + figureClass}>
       <img className="is-rounded" src={thumbUrl} />
     </figure>
   } else {
-    return <span className="icon"><FontAwesomeIcon icon={faUser} /></span>;
+    return <FontAwesomeIcon icon={faUser} />;
   }
 }
 
