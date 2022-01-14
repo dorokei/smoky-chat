@@ -74,9 +74,7 @@ const Door = ({ room }: { room: RoomModel }) => {
   if (standinAt == StandingAt.Indoor && localStream) {
     return <>
       <IndoorSpace room={room} localStream={localStream} />
-      <div className="container">
-        <button onClick={hangOff}>退室する</button>
-      </div>
+      <button onClick={hangOff} className="button is-warning">退室する</button>
     </>
   }
 
@@ -95,9 +93,7 @@ const Door = ({ room }: { room: RoomModel }) => {
   }
 
   return (
-    <div className="container">
-      <button onClick={enterTheRoom}>入室する</button>
-    </div>
+    <button onClick={enterTheRoom} className="button is-success">入室する</button>
   );
 }
 

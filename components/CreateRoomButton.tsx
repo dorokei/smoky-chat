@@ -3,21 +3,24 @@ import Router from 'next/router';
 import firebase from '../lib/Firebase';
 import Logger from '../lib/Logger'
 import { AuthContext } from '../contexts/Auth';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 const CreateRoomButton: FC = () => {
-  const { currentUser } = useContext(AuthContext);
+  // const { currentUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    currentUser && Router.push('/')
-  }, [currentUser]);
+  // useEffect(() => {
+  //   currentUser && Router.push('/')
+  // }, [currentUser]);
 
   const createRoom = () => {
+    setLoading(true)
     setErrorMessage(undefined);
 
     const db = firebase.firestore();
-    const roomsRef = db.collection("rooms");
+    // const roomsRef = db.collection("rooms");
     const minutes = 10; // 10分
     const roomInfo = {
       finishAt: new Date(Date.now() + minutes * 60 * 1000),
@@ -38,15 +41,21 @@ const CreateRoomButton: FC = () => {
     });
   }
 
-  if (loading) {
-    return <div>送信中</div>
-  }
+  // if (loading) {
+  //   return <div>送信中</div>
+  // }
 
   return (
-    <div className="container">
-      <button onClick={createRoom}>休憩する</button>
+    <>
+      <button
+        className="button is-large"
+        onClick={createRoom}
+        disabled={loading}
+      >
+        休憩する
+      </button>
       {errorMessage}
-    </div>
+    </>
   )
 }
 

@@ -1,16 +1,11 @@
-import { FC, useEffect, useContext } from 'react';
-import Router from 'next/router';
+import { FC, useContext } from 'react';
 import firebase from '../lib/Firebase';
 import { AuthContext } from '../contexts/Auth';
 
-const SignIn: FC = () => {
+const SignInButton: FC = () => {
   const { currentUser } = useContext(AuthContext);
 
-  // useEffect(() => {
-  //   currentUser && Router.push('/')
-  // }, [currentUser]);
-
-  const login = () => {
+  const signInWithGoogle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     // firebase.auth().signInWithRedirect(provider);
     firebase.auth().signInWithPopup(provider).then((result) => {
@@ -28,7 +23,7 @@ const SignIn: FC = () => {
     });
   }
 
-  const signout = () => {
+  const signOut = () => {
     firebase.auth().signOut().then(() => {
       // logout
     }).catch((error) => {
@@ -36,20 +31,15 @@ const SignIn: FC = () => {
     });
   }
 
-
   if (!currentUser) {
     return (
-      <div className="container">
-        <button onClick={login}>googleでログインする</button>
-      </div>
+      <button className="button is-primary" onClick={signInWithGoogle}>Sign in with Google</button>
     )
   } else {
     return (
-      <div className="container">
-        <button onClick={signout}>ログアウト</button>
-      </div >
+      <a onClick={signOut}>ログアウト</a>
     )
   }
 }
 
-export default SignIn;
+export default SignInButton;

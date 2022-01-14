@@ -3,6 +3,9 @@ import Logger from '../lib/Logger'
 import PeerConnectionManager from '../services/PeerConnectionManager'
 import RoomModel from '../models/Room'
 import VisualizedAudioStream from './VisualizedAudioStream'
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import { faUser } from '@fortawesome/free-solid-svg-icons'
+import UserIcon from './UserIcon';
 
 // 1. Add myself to room
 // 2. Check how many users already exist and send offer
@@ -160,12 +163,18 @@ const IndoorSpace = ({ room, localStream }: { room: RoomModel, localStream: Medi
   return (
     <>
       <div>室内だよ room id: {room.roomId}, my id: {myId}</div>
-      <VisualizedAudioStream stream={localStream} />
+      <div className="is-flex is-align-items-center">
+        <UserIcon thumbUrl={null} figureClass='is-64x64'></UserIcon>
+        <VisualizedAudioStream stream={localStream} />
+      </div>
       <div className="container">
         <ul>
           {remoteStreams.map((remoteStream) => {
             return <li>
-              <VisualizedAudioStream stream={remoteStream.stream} />
+              <div className="is-flex is-align-items-center">
+                <UserIcon thumbUrl={null} figureClass='is-64x64'></UserIcon>
+                <VisualizedAudioStream stream={remoteStream.stream} />
+              </div>
               <audio ref={ref => setSrcObject(ref, remoteStream.stream)} autoPlay />
             </li>;
           })}

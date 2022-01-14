@@ -5,6 +5,8 @@ import Logger from '../../lib/Logger'
 import Door from '../../components/Door'
 import RoomInfo from '../../components/RoomInfo'
 import RoomModel from '../../models/Room'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 // Talk Room(部屋情報取ってくるだけ)
 // 4 states: {loading, loadSuccess, 404, room fetching error}
@@ -43,9 +45,17 @@ export default function Room() {
   // loading
   if (loading) {
     return (
-      <div>
-        loading...
-        <p>Post: {roomId}</p>
+      <div className="hero is-fullheight">
+        <div className="hero-body">
+          <div className="container has-text-centered">
+            <p className="title is-1">
+              <span className="icon"><FontAwesomeIcon icon={faSpinner} pulse /></span>
+            </p>
+            <p className="subtitle is-3">
+              Loading...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -66,3 +76,11 @@ export default function Room() {
   // 404
   return <div>404 Not Found</div>
 }
+
+Room.getLayout = (page: any) => (
+  <div className="columns is-centered">
+    <div className="column is-half">
+      {page}
+    </div>
+  </div>
+)
